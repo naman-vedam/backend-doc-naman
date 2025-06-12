@@ -1,4 +1,4 @@
-interface MeetingData {
+export interface MeetingData {
   id: string
   title: string
   description: string
