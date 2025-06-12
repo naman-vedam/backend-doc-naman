@@ -47,3 +47,5 @@ declare module "next-auth/jwt" {
     error?: string
   }
 }
+
+

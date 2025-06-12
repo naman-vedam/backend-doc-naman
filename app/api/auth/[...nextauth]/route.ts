@@ -55,7 +55,8 @@ const authOptions: NextAuthOptions = {
             'openid',
             'email',
             'profile',
-            'https://www.googleapis.com/auth/user.phonenumbers.read'
+            'https://www.googleapis.com/auth/user.phonenumbers.read',
+            'https://www.googleapis.com/auth/calendar.events'  // NEW SCOPE ADDED
           ].join(' '),
           access_type: "offline",
           prompt: "consent",
@@ -71,20 +72,16 @@ const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token
         token.refreshToken = account.refresh_token
         token.googleId = account.providerAccountId
-        // Set expiration time (Google tokens typically expire in 1 hour)
         token.accessTokenExpires = Date.now() + (account.expires_in as number) * 1000
       }
 
-      // Store profile information from Google
       if (profile) {
         token.googleId = profile.sub
         token.givenName = profile.given_name
         token.familyName = profile.family_name
       }
 
-      // If we have an access token and expiration time, check if it needs refresh
       if (token.accessTokenExpires && token.refreshToken) {
-        // If token expires in less than 5 minutes, refresh it
         if (Date.now() > (token.accessTokenExpires as number) - 5 * 60 * 1000) {
           console.log('Access token expired, refreshing...')
           return refreshAccessToken(token)
@@ -95,7 +92,6 @@ const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      // Transfer data from token to session
       session.accessToken = token.accessToken as string
       session.user.googleId = token.googleId as string
       session.user.givenName = token.givenName as string
@@ -116,14 +112,11 @@ const authOptions: NextAuthOptions = {
 
           if (response.ok) {
             const data = await response.json()
-            
-            // Process and deduplicate phone numbers
             const phoneNumbers = data.phoneNumbers || []
             const uniquePhones = phoneNumbers.filter(
               (phone: any, index: number, self: any[]) =>
                 index === self.findIndex((p: any) => p.value === phone.value)
             )
-            
             session.user.phoneNumbers = uniquePhones
           } else {
             console.warn('Failed to fetch phone numbers:', response.status)
@@ -143,7 +136,7 @@ const authOptions: NextAuthOptions = {
 
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   pages: {
