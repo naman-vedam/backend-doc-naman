@@ -13,6 +13,7 @@ export default function Component() {
   if (status === "loading") return <p>Loading...</p>;
   console.log(session?.user);
   console.log(session?.accessToken);
+  console.log("Refresh Token:", session?.refreshToken);
   if (session) {
     return (
       <div className="p-6 max-w-md mx-auto  rounded-lg shadow-md">

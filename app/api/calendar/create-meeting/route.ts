@@ -1,3 +1,4 @@
+// Update your existing meeting API
 import { google } from 'googleapis'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -17,16 +18,16 @@ export async function POST(request: NextRequest) {
 
     const meetingData: MeetingData = await request.json()
 
-    // Step 1: Initialize Google API client with OAuth2
+    // Initialize Google API client with OAuth
     const auth = new google.auth.OAuth2()
     auth.setCredentials({ access_token: session.accessToken })
 
     const calendar = google.calendar({ version: 'v3', auth })
 
-    // Step 2: Construct the calendar event with Meet link
+    // Construct the calendar event with Meet link
     const event = {
       summary: meetingData.title,
-      description: meetingData.description,
+      description: `${meetingData.description || ''}\n\n🎥 Recording will be available after the meeting ends. Use the recording download feature to get it automatically.`,
       start: {
         dateTime: meetingData.startTime,
         timeZone: meetingData.timeZone,
@@ -43,9 +44,11 @@ export async function POST(request: NextRequest) {
           },
         },
       },
+      // Add attendees if provided
+      attendees: meetingData.attendees?.map(email => ({ email })) || [],
     }
 
-    // Step 3: Use SDK to insert the event
+    // Insert the event
     const { data: createdEvent } = await calendar.events.insert({
       calendarId: 'primary',
       requestBody: event,
@@ -57,16 +60,24 @@ export async function POST(request: NextRequest) {
         (ep) => ep.entryPointType === 'video'
       )?.uri || createdEvent.hangoutLink
 
+    // Store meeting info for later recording retrieval
+    const meetingInfo = {
+      id: createdEvent.id,
+      title: createdEvent.summary,
+      startTime: createdEvent.start?.dateTime,
+      endTime: createdEvent.end?.dateTime,
+      meetLink,
+      calendarLink: createdEvent.htmlLink,
+      recordingInstructions: {
+        message: "To enable recording, click 'Record meeting' when the meeting starts",
+        downloadEndpoint: "/api/recordings/download",
+        listEndpoint: "/api/recordings/list"
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      event: {
-        id: createdEvent.id,
-        title: createdEvent.summary,
-        startTime: createdEvent.start?.dateTime,
-        endTime: createdEvent.end?.dateTime,
-        meetLink,
-        calendarLink: createdEvent.htmlLink,
-      },
+      event: meetingInfo,
     })
   } catch (error) {
     console.error('💥 Error using Calendar SDK:', error)

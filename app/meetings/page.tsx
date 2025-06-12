@@ -3,7 +3,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import GoogleButton from "react-google-button";
 import { useState } from "react";
 import meetingsData from "@/public/meetings.json"
-
+import RecordingManager from "@/components/RecordingManager";
 interface Meeting {
   id: string;
   title: string;
@@ -198,6 +198,7 @@ export default function Component() {
             </div>
           </div>
         )}
+        {/* <RecordingManager />   */}
       </div>
     );
   }

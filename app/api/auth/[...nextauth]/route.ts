@@ -56,7 +56,9 @@ const authOptions: NextAuthOptions = {
             'email',
             'profile',
             'https://www.googleapis.com/auth/user.phonenumbers.read',
-            'https://www.googleapis.com/auth/calendar.events'  // NEW SCOPE ADDED
+            'https://www.googleapis.com/auth/calendar.events',
+            'https://www.googleapis.com/auth/drive.readonly', 
+      // 'https://www.googleapis.com/auth/drive.metadata.readonly' 
           ].join(' '),
           access_type: "offline",
           prompt: "consent",
@@ -93,6 +95,7 @@ const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       session.accessToken = token.accessToken as string
+      session.refreshToken = token.refreshToken as string;
       session.user.googleId = token.googleId as string
       session.user.givenName = token.givenName as string
       session.user.familyName = token.familyName as string
