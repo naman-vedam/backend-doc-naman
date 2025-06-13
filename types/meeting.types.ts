@@ -7,6 +7,10 @@ export interface MeetingData {
   endTime: string
   timeZone: string
   attendees?: string[]
+  eventId?: string
+  hostName?: string
+  hostEmail?: string
+  originalTitle?: string
 }
 
 export interface Recording {

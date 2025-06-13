@@ -13,6 +13,7 @@ export default function Component() {
   if (status === "loading") return <p>Loading...</p>;
   console.log(session?.user);
   console.log(session?.accessToken);
+  console.log( "acount",session?.account);
   console.log("Refresh Token:", session?.refreshToken);
   if (session) {
     return (
@@ -81,3 +82,19 @@ export default function Component() {
     </div>
   );
 }
+
+
+
+
+    // {
+    //     https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?
+    //     // client_id=254729686698-gjsokosucio4omhtbpc1lfnbatm879mi.apps.googleusercontent.com&
+    //     // scope=openid%20email%20profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuser.phonenumbers.read%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly
+    //     // &response_type=code
+    //     // &redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle
+    //     // &access_type=offline
+    //     // &prompt=consen
+    //     // t&state=BGO30S_VpDMo_yAvIGV-zI1gNfhGGAI_L-l2jVNrxwc&code_challenge=xZjp71L-lQmgwmXhxO2PpYcUSlgKHECNRHs9QVf14OU
+    //     // &code_challenge_method=S256&service=lso&o2v=2
+    //     // &flowName=GeneralOAuthFlow
+    // }

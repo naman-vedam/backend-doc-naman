@@ -1,9 +1,18 @@
-// Update your existing meeting API
+// app/api/meet/create/route.ts
 import { google } from 'googleapis'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
-import { MeetingData } from '@/types/meeting.types'
+
+interface MeetingData {
+  id: string
+  title: string
+  description?: string
+  startTime: string
+  endTime: string
+  timeZone: string
+  attendees?: string[]
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +53,7 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-      // Add attendees if provided
+      // Add attendees - i am not using for now
       attendees: meetingData.attendees?.map(email => ({ email })) || [],
     }
 
@@ -54,20 +63,26 @@ export async function POST(request: NextRequest) {
       requestBody: event,
       conferenceDataVersion: 1,
     })
-
+    console.log("naman cal",calendar.events)
     const meetLink =
       createdEvent.conferenceData?.entryPoints?.find(
         (ep) => ep.entryPointType === 'video'
       )?.uri || createdEvent.hangoutLink
 
-    // Store meeting info for later recording retrieval
+    // Extracting Meet ID from the meet link
+    const meetId = meetLink ? extractMeetIdFromUrl(meetLink) : null
+
+    // Storing meeting info 
     const meetingInfo = {
-      id: createdEvent.id,
+      id: createdEvent.id, // event ID 
       title: createdEvent.summary,
       startTime: createdEvent.start?.dateTime,
       endTime: createdEvent.end?.dateTime,
       meetLink,
+      meetId, 
       calendarLink: createdEvent.htmlLink,
+      hostEmail: session.user?.email, // From auth session
+      calendarEventId: createdEvent.id, 
       recordingInstructions: {
         message: "To enable recording, click 'Record meeting' when the meeting starts",
         downloadEndpoint: "/api/recordings/download",
@@ -75,6 +90,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log('✅ Meeting created successfully:', {
+      eventId: createdEvent.id,
+      meetId: meetId,
+      hostEmail: session.user?.email
+    })
+    console.log("naman",createdEvent)
     return NextResponse.json({
       success: true,
       event: meetingInfo,
@@ -86,4 +107,20 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// this is the function to extract Meet ID from Google Meet URL
+
+function extractMeetIdFromUrl(meetUrl: string): string | null {
+  const patterns = [
+    /meet\.google\.com\/([a-z]{3}-[a-z]{4}-[a-z]{3})/i,
+    /meet\.google\.com\/lookup\/([^?]+)/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = meetUrl.match(pattern)
+    if (match) return match[1]
+  }
+
+  return null
 }

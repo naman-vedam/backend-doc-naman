@@ -23,6 +23,7 @@ async function refreshAccessToken(token: any) {
       }),
     })
 
+
     const refreshedTokens = await response.json()
 
     if (!response.ok) {
@@ -52,7 +53,7 @@ const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: [
-            'openid',
+            // 'openid',
             'email',
             'profile',
             'https://www.googleapis.com/auth/user.phonenumbers.read',
@@ -71,9 +72,11 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, account, profile }) {
       // Store access tokens on initial sign-in
       if (account) {
+        console.log("test",account)
         token.accessToken = account.access_token
         token.refreshToken = account.refresh_token
         token.googleId = account.providerAccountId
+        // token.account = account
         token.accessTokenExpires = Date.now() + (account.expires_in as number) * 1000
       }
 
@@ -96,10 +99,14 @@ const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken as string
       session.refreshToken = token.refreshToken as string;
+      session.account = token.account as object;
       session.user.googleId = token.googleId as string
       session.user.givenName = token.givenName as string
       session.user.familyName = token.familyName as string
       session.error = token.error as string
+
+      // console.log("Praz",session )
+      // console.log("Praz1",token )
 
       // Fetch phone numbers from Google People API
       if (token.accessToken && !token.error) {
@@ -112,6 +119,8 @@ const authOptions: NextAuthOptions = {
               },
             }
           )
+              // console.log("Praz2",response)
+
 
           if (response.ok) {
             const data = await response.json()
