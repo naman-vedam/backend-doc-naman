@@ -13,7 +13,7 @@ interface Recording {
   description?: string
   participants?: string[]
   duration?: string
-  // Add these new fields for better identification
+
   calendarEventId?: string
   hostEmail?: string
   hostName?: string

@@ -11,6 +11,7 @@ export interface MeetingData {
   hostName?: string
   hostEmail?: string
   originalTitle?: string
+  
 }
 
 export interface Recording {

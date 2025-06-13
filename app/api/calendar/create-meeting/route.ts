@@ -3,16 +3,8 @@ import { google } from 'googleapis'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
+import { MeetingData } from '@/types/meeting.types'
 
-interface MeetingData {
-  id: string
-  title: string
-  description?: string
-  startTime: string
-  endTime: string
-  timeZone: string
-  attendees?: string[]
-}
 
 export async function POST(request: NextRequest) {
   try {
